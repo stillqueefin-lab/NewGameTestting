@@ -1,0 +1,41 @@
+{
+  "name": "StealFromTheBeast",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "SFTBShared": {
+        "$path": "src/shared"
+      },
+      "SFTBRemotes": {
+        "$className": "Folder",
+        "StateChanged": { "$className": "RemoteEvent" },
+        "Toast": { "$className": "RemoteEvent" }
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "SFTBServer": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "SFTBClient": {
+          "$path": "src/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "$properties": {
+        "StreamingEnabled": true,
+        "ModelStreamingBehavior": "Improved",
+        "StreamingIntegrityMode": "PauseOutsideLoadedArea",
+        "PlayerCharacterDestroyBehavior": "Enabled"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+# Toolchain pinned with Rokit (vault: Coding Standards). After installing Rokit run:
+#   rokit install
+#   rokit add Kampfkarren/selene
+#   rokit add JohnnyMorganz/StyLua
+#   rokit add JohnnyMorganz/luau-lsp
+[tools]
+rojo = "rojo-rbx/rojo@7.7.0"
