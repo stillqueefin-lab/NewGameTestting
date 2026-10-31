@@ -1,7 +1,6 @@
-# Toolchain pinned with Rokit (vault: Coding Standards). After installing Rokit run:
-#   rokit install
-#   rokit add Kampfkarren/selene
-#   rokit add JohnnyMorganz/StyLua
-#   rokit add JohnnyMorganz/luau-lsp
+# Toolchain pinned with Rokit (vault: Coding Standards). New machine: install Rokit, then `rokit install`.
 [tools]
 rojo = "rojo-rbx/rojo@7.7.0"
+selene = "Kampfkarren/selene@0.32.0"
+StyLua = "JohnnyMorganz/StyLua@2.6.0"
+luau-lsp = "JohnnyMorganz/luau-lsp@1.70.1"

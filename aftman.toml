@@ -1,3 +1,0 @@
-# Bridge until Rokit is installed: lets the existing Aftman rojo run here. Remove once `rokit install` works.
-[tools]
-rojo = "rojo-rbx/rojo@7.7.0"

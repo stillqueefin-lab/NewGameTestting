@@ -16,7 +16,10 @@ local ServerRoot = ServerScriptService:WaitForChild("SFTBServer")
 local remoteFolder = ReplicatedStorage:WaitForChild("SFTBRemotes")
 for _, spec in ipairs(require(SharedRoot:WaitForChild("Remotes"))) do
 	local remote = remoteFolder:FindFirstChild(spec.Name)
-	assert(remote and remote.ClassName == spec.ClassName, "[SFTB] Missing or invalid remote: " .. spec.Name)
+	assert(
+		remote and remote.ClassName == spec.ClassName,
+		"[SFTB] Missing or invalid remote: " .. spec.Name
+	)
 end
 
 local Config = require(SharedRoot:WaitForChild("Config"))
@@ -24,11 +27,15 @@ local DataService = require(ServerRoot:WaitForChild("Data"):WaitForChild("DataSe
 local Guard = require(ServerRoot:WaitForChild("Infrastructure"):WaitForChild("ActionGuard"))
 
 local function onPlayerAdded(player)
-	if DataService.Load(player) then DataService.Push(player) end
+	if DataService.Load(player) then
+		DataService.Push(player)
+	end
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
-for _, player in ipairs(Players:GetPlayers()) do task.spawn(onPlayerAdded, player) end
+for _, player in ipairs(Players:GetPlayers()) do
+	task.spawn(onPlayerAdded, player)
+end
 
 Players.PlayerRemoving:Connect(function(player)
 	DataService.Release(player)

@@ -3,15 +3,21 @@
 local Schema = {}
 
 function Schema.Copy(value)
-	if type(value) ~= "table" then return value end
+	if type(value) ~= "table" then
+		return value
+	end
 	local out = {}
-	for key, item in pairs(value) do out[key] = Schema.Copy(item) end
+	for key, item in pairs(value) do
+		out[key] = Schema.Copy(item)
+	end
 	return out
 end
 
 local function integer(value, default, min, max)
 	value = tonumber(value)
-	if value == nil or value ~= value or math.abs(value) == math.huge then return default end
+	if value == nil or value ~= value or math.abs(value) == math.huge then
+		return default
+	end
 	return math.clamp(math.floor(value), min, max)
 end
 
