@@ -1,4 +1,4 @@
--- Stage 1 greybox builder for Steal From the Beast.
+-- Greybox lair builder for Steal From the Beast (Stage 1 lair, Stage 2 noise traps).
 -- Run in Studio's command bar (or via the Studio MCP) with Rojo connected, then save the place.
 -- Rebuilds Workspace.SFTB_Lair from Config.Lair, sets lair lighting, and applies the
 -- block-out fixes from the style sheet. Safe to run again: it replaces its own output.
@@ -163,9 +163,52 @@ local function hollow(parent, name, cf)
 	return m
 end
 
+-- Stage 2: a noise trap is a flat, invisible floor part tagged Config.Noise.TrapTag with a
+-- "Trap" attribute; NoiseService reads its radius and cooldown from Config.Noise.Traps.
+local function trapZone(parent, kind, pos)
+	local r = Config.Noise.Traps[kind].TriggerRadius
+	local zone = part(
+		parent,
+		"TrapZone",
+		Vector3.new(0.2, r * 2, r * 2),
+		CFrame.new(pos + Vector3.new(0, 0.1, 0)) * CFrame.Angles(0, 0, math.pi / 2),
+		C.Floor,
+		{
+			Shape = Enum.PartType.Cylinder,
+			Transparency = 1,
+			CanCollide = false,
+			CanQuery = false,
+			CanTouch = false,
+		}
+	)
+	zone:SetAttribute("Trap", kind)
+	CollectionService:AddTag(zone, Config.Noise.TrapTag)
+end
+
+local function rootTangle(parent, pos)
+	local m = Instance.new("Model")
+	m.Name = "RootTangle"
+	for i = 1, 5 do
+		local cf = CFrame.new(
+			pos + Vector3.new(rng:NextNumber(-1.5, 1.5), 0.35, rng:NextNumber(-1.5, 1.5))
+		) * CFrame.Angles(0, rng:NextNumber(0, math.pi), rng:NextNumber(-0.15, 0.15))
+		part(
+			m,
+			"Root" .. i,
+			Vector3.new(0.7, 0.5, rng:NextNumber(4, 6)),
+			cf,
+			C.Roots,
+			{ CanCollide = false }
+		)
+	end
+	trapZone(m, "Roots", pos)
+	m.Parent = parent
+end
+
 local function bonePile(parent, pos)
 	local m = Instance.new("Model")
 	m.Name = "BonePile"
+	trapZone(m, "Bones", pos)
 	for i = 1, 4 do
 		local cf = CFrame.new(
 			pos + Vector3.new(rng:NextNumber(-1.5, 1.5), 0.4, rng:NextNumber(-1.5, 1.5))
@@ -242,7 +285,7 @@ end
 
 local lair = Instance.new("Model")
 lair.Name = "SFTB_Lair"
-lair:SetAttribute("Stage", 1)
+lair:SetAttribute("Stage", 2)
 
 ---------------------------------------------------------------------------------------------
 -- 2. Rooms: floor, walls with doors, ceiling, boulders.
@@ -383,6 +426,10 @@ strip(lair, Vector3.new(pathC.X, 0, pathC.Z + half), doorA, 6) -- route A
 strip(lair, pathC, doorPS, 6)
 strip(lair, doorPS, sideC, 6)
 strip(lair, sideC, doorB, 6) -- route B
+
+-- Stage 2: one root tangle (noise trap) on each route, on the soil path so it can be stepped round.
+rootTangle(roomModels.Path, Vector3.new(pathC.X, 0, pathC.Z - 12)) -- route A
+rootTangle(roomModels.Side, Vector3.new(sideC.X, 0, sideC.Z - 12)) -- route B
 
 ---------------------------------------------------------------------------------------------
 -- 5. Hiding spots: one on each route, plus one by each nest door.

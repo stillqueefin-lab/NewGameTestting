@@ -12,11 +12,16 @@ Co-op monster-lair heist + creature raising. Plan and rules live in the Obsidian
 ## Rebuild the greybox lair
 The lair is built from `Config.Lair` (kit grid + fixed layout). With Rojo connected, paste `tools/BuildLairGreybox.luau` into Studio's command bar, run it, then save/publish the place. It replaces its own output and sets the lair lighting.
 
+## Controls (Stage 2)
+- Stick or touch thumbstick: tilt sets speed (gentle = sneak, full = run). Keyboard: walk by default, hold **Shift** to sneak, hold **Ctrl** to run. No crouch button, no jump.
+- Power Q / RB and Ping F / LB are stubs; Drop/Pass G / Y shows only while carrying (Stage 4). Phone shows max 3 buttons.
+- The server reads real speed for noise (`NoiseService`); clients only draw the rings. Noise traps are floor parts tagged `SFTB_NoiseTrap` with a `Trap` attribute, made by the lair builder.
+
 ## Layout
 ```
 src/shared/   Config/  Catalogs/  Rules/  Visuals/  Remotes.luau
-src/server/   Bootstrap.server.luau  Data/  Infrastructure/  <one folder per domain>
-src/client/   Main.client.luau  UI/  Effects/ (Flashlight, EggPulse)
+src/server/   Bootstrap.server.luau  Data/  Infrastructure/  Noise/ (NoiseService)  <one folder per domain>
+src/client/   Main.client.luau  UI/  Controls/  Effects/ (Flashlight, EggPulse, NoiseRings)
 tools/        Studio command-bar scripts (not synced by Rojo)
 ```
 - Every tunable goes in `src/shared/Config`.
