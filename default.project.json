@@ -10,7 +10,8 @@
       "SFTBRemotes": {
         "$className": "Folder",
         "StateChanged": { "$className": "RemoteEvent" },
-        "Toast": { "$className": "RemoteEvent" }
+        "Toast": { "$className": "RemoteEvent" },
+        "NoiseEvent": { "$className": "UnreliableRemoteEvent" }
       }
     },
     "ServerScriptService": {
@@ -21,6 +22,11 @@
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",
+      "$properties": {
+        "CharacterJumpHeight": 0,
+        "CharacterJumpPower": 0,
+        "EnableMouseLockOption": false
+      },
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
         "SFTBClient": {

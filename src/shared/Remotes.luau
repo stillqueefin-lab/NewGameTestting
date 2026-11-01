@@ -8,6 +8,7 @@ export type RemoteSpec = { Name: string, ClassName: "RemoteEvent" | "UnreliableR
 local Remotes: { RemoteSpec } = {
 	{ Name = "StateChanged", ClassName = "RemoteEvent" }, -- server -> client profile state
 	{ Name = "Toast", ClassName = "RemoteEvent" }, -- server -> client short message
+	{ Name = "NoiseEvent", ClassName = "UnreliableRemoteEvent" }, -- server -> client noise ring
 }
 
 return Remotes

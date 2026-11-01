@@ -63,19 +63,73 @@ Config.EggPulse = {
 	MaxBrightness = 1.4,
 }
 
--- Stage 2: noise model (stick tilt sets speed and noise). Placeholders.
+-- Stage 2: noise model (stick tilt sets speed and noise). Starting values; tune in Play.
+-- Stick and touch are analog: the Humanoid scales WalkSpeed by tilt, so analog players get
+-- RunSpeed and a gentle push is a sneak. Keyboard: walk by default, Shift sneak, Ctrl run.
+-- The server never asks the client its tier: it reads real horizontal speed and bands it.
 Config.Noise = {
-	SneakSpeed = 8,
+	SneakSpeed = 8, -- keyboard speeds (studs/s); analog players reach any speed up to RunSpeed
 	WalkSpeed = 12,
 	RunSpeed = 18,
+	MinSpeed = 2, -- below this the server counts you as standing still (no steps)
+	SneakMaxSpeed = 10, -- server tier bands from measured speed
+	WalkMaxSpeed = 15,
+	TeleportSpeed = 60, -- a jump faster than this between samples is a respawn/teleport, ignored
+	SampleSeconds = 0.1, -- server speed sample rate
+	SpeedSmoothing = 0.5, -- 0-1, share of each new sample (stops one laggy sample flipping tiers)
+	StepStuds = 6, -- one footstep (noise event) per this many studs moved
 	SneakRadius = 6, -- studs of noise ring per step
 	WalkRadius = 14,
 	RunRadius = 28,
-	CarryNoiseMultiplier = 1.5,
+	CarryNoiseMultiplier = 1.5, -- Stage 4 sets the player attribute "SFTB_Carrying"
+	TrapTag = "SFTB_NoiseTrap", -- tagged floor parts with a "Trap" attribute naming an entry below
+	TrapHeight = 6, -- studs above a trap that still count as standing on it
 	Traps = {
-		Bones = { Radius = 30 },
-		Roots = { Radius = 20 },
+		Bones = { Radius = 30, TriggerRadius = 3, Cooldown = 4 },
+		Roots = { Radius = 20, TriggerRadius = 3.5, Cooldown = 4 },
 	},
+}
+
+-- Stage 2: noise rings (client visual). Colour is a neutral stone grey, not a light-language
+-- colour yet (proposed for the style sheet): it is not amber, teal or near-white.
+Config.NoiseRing = {
+	Color = Color3.fromHex("A39F8E"),
+	Thickness = 0.5, -- studs; footstep ring width
+	TrapThickness = 1.2, -- traps draw a heavier ring
+	Lift = 0.15, -- studs above the floor
+	StartTransparency = 0.2,
+	GrowSeconds = 0.35,
+	FadeSeconds = 0.5,
+	TrapFadeSeconds = 0.9,
+	PoolSize = 32, -- most rings alive at once; extra events are skipped
+	MaxDistance = 160, -- skip rings this far from the camera
+}
+
+-- Stage 2: haptics for loud noise you make (phone and gamepad).
+Config.Haptics = {
+	MinRadius = 20, -- buzz for your own noise at least this loud (runs and traps)
+}
+
+-- Stage 2: controls. One Input Action System map for a run. No crouch button, no jump.
+-- Phone: max 3 buttons in a run (Power, Ping, Drop/Pass only while carrying).
+Config.Controls = {
+	SneakKeys = { Enum.KeyCode.LeftShift, Enum.KeyCode.RightShift },
+	RunKeys = { Enum.KeyCode.LeftControl, Enum.KeyCode.RightControl },
+	Power = { Key = Enum.KeyCode.Q, Gamepad = Enum.KeyCode.ButtonR1, Label = "Power" },
+	Ping = { Key = Enum.KeyCode.F, Gamepad = Enum.KeyCode.ButtonL1, Label = "Ping" },
+	DropPass = { Key = Enum.KeyCode.G, Gamepad = Enum.KeyCode.ButtonY, Label = "Drop" },
+	Hint = {
+		Touch = "Push the stick gently to sneak",
+		Gamepad = "Tilt the stick gently to sneak",
+		KeyboardAndMouse = "Hold Shift to sneak, Ctrl to run",
+	},
+	KeyHint = {
+		Gamepad = "RB Power   LB Ping",
+		KeyboardAndMouse = "Q Power   F Ping",
+	},
+	HintSneakSeconds = 3, -- the hint fades after this much sneaking (server-read tier)
+	ButtonSize = 0.15, -- phone buttons, share of screen height
+	StubToastSeconds = 1.5, -- Power and Ping are stubs until Stages 6 and 10
 }
 
 -- Stage 3: The Hush (hunts by sound only). Placeholders.
