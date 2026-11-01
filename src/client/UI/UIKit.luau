@@ -242,26 +242,17 @@ function Kit.Hover(object, options)
 				down and Enum.EasingStyle.Quad or Enum.EasingStyle.Back
 			)
 			if options.Lift and rest then
-				tween(
-					object,
-					0.2,
-					{
-						Position = (over and not down)
-								and rest + UDim2.fromOffset(0, -options.Lift)
-							or rest,
-					}
-				)
+				tween(object, 0.2, {
+					Position = (over and not down) and rest + UDim2.fromOffset(0, -options.Lift)
+						or rest,
+				})
 			end
 		end
 		if stroke then
-			tween(
-				stroke,
-				0.16,
-				{
-					Thickness = over and restThickness + (options.StrokeGrow or 1) or restThickness,
-					Color = over and (options.StrokeColor or restColor) or restColor,
-				}
-			)
+			tween(stroke, 0.16, {
+				Thickness = over and restThickness + (options.StrokeGrow or 1) or restThickness,
+				Color = over and (options.StrokeColor or restColor) or restColor,
+			})
 		end
 		if options.Changed then
 			options.Changed(over, down)
