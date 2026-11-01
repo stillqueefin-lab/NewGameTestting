@@ -11,5 +11,7 @@ end
 local Effects = script.Parent:WaitForChild("Effects")
 require(Effects:WaitForChild("Flashlight")).Start()
 require(Effects:WaitForChild("EggPulse")).Start()
+require(Effects:WaitForChild("NoiseRings")).Start()
+require(script.Parent:WaitForChild("Controls"):WaitForChild("Controls")).Start()
 
 print("[SFTB] Client ready")
