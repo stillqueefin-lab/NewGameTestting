@@ -8,4 +8,8 @@ for _, spec in ipairs(require(SharedRoot:WaitForChild("Remotes")) :: any) do
 	remoteFolder:WaitForChild(spec.Name)
 end
 
+local Effects = script.Parent:WaitForChild("Effects")
+require(Effects:WaitForChild("Flashlight")).Start()
+require(Effects:WaitForChild("EggPulse")).Start()
+
 print("[SFTB] Client ready")
