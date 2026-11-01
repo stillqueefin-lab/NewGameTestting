@@ -5,7 +5,7 @@ Co-op monster-lair heist + creature raising. Plan and rules live in the Obsidian
 
 ## Run it
 1. `rojo serve` in this folder.
-2. Open `place/SFTB_Test.rbxl` in Studio (it holds the map: `Workspace.SFTB_Mockup`).
+2. Open the published test place "TEST" (place 88566244065044, WHITEOUT INC) in Studio. It holds the map: `Workspace.SFTB_Mockup`.
 3. Rojo plugin > Connect. Code syncs into `SFTBShared`, `SFTBServer`, `SFTBClient`.
 4. Test > Play (2 clients for anything multiplayer).
 
