@@ -219,13 +219,38 @@ Config.Carry = {
 	DropPassCooldown = 0.5, -- Action Guard interval on the Drop/Pass remote
 }
 
--- Stages 6 and 8: hatching, Listen power, incubators. Placeholders.
+-- Stages 6 and 8: hatching, Listen power, incubators.
+-- Escape with an egg: the crew is taken to camp and it hatches with the egg build-up
+-- (wobble, harder wobble, swell, white flash, pop). The Hushling follows its owner.
 Config.Hatch = {
 	FreeIncubatorSlots = 2,
 	MaxIncubatorSlots = 4,
 	HatchSeconds = 600,
-	ListenSeconds = 4,
+	ListenSeconds = 4, -- the Hush shows through walls this long
 	ListenCooldown = 30,
+	ListenShareRadius = 60, -- crewmates this close see it too
+	UsePowerInterval = 0.3, -- Action Guard interval on the power remote
+	RevealSeconds = 2.6, -- whole hatch reveal; the follower appears after it
+	RevealDistance = 7, -- egg sits this far in front of you
+	FadeSeconds = 0.35, -- fade that hides the trip to camp
+	HatchedText = "A Hushling hatched!",
+	PowerText = { KeyboardAndMouse = "Q", Gamepad = "RB", Touch = "Power" },
+	ListenText = "Listening...",
+	NoPowerText = "Steal an egg and hatch a Hushling to use its power",
+	-- Hushling: a small Hush. Big head, big low eyes, stubby legs, the parent's teal ears.
+	FollowOffset = Vector3.new(2.5, 0, 3), -- behind and to the right of its owner
+	FollowSharpness = 6,
+	BreatheSpeed = 2.4, -- radians/s
+	BreatheAmount = 0.08, -- studs
+	BlinkEvery = 3.2, -- seconds
+	EyeColor = Color3.fromHex("151816"),
+}
+
+-- Camp (greybox from the block-out at x = 400). Crews arrive here after a run.
+Config.Camp = {
+	Centre = Vector3.new(400, 0, 0),
+	Arrive = Vector3.new(400, 3, -11), -- by the fire, facing it
+	ArriveSpread = 4,
 }
 
 -- Stage 11: shop. Prices are read live from Roblox; only ids live here.

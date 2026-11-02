@@ -47,6 +47,7 @@ local hasRun: { [Player]: boolean } = {} -- this session; Stage 8 saves it
 local escapeZ = math.huge
 local noise: any -- NoiseService
 local hush: any -- HushService
+local hatch: any -- HatchService
 
 local function hrpOf(player: Player): BasePart?
 	local character = player.Character
@@ -218,13 +219,16 @@ local function update()
 			then
 				EggService.Drop(egg, back) -- the back carrier lost grip: the big egg falls
 			elseif hrp.Position.Z > escapeZ then
+				local crew = {}
 				for _, p in ipairs({ front, back }) do
 					if p then
 						Toast:FireClient(p, E.SuccessText, E.SuccessSeconds)
+						table.insert(crew, p)
 					end
 				end
-				-- Until hatching exists (Stage 6), the egg goes back to its bed, locked for a moment.
+				-- The crew goes to camp and it hatches; the egg goes back to its bed, locked for a moment.
 				reset(egg)
+				hatch.Escaped(crew, egg.Size)
 				egg.Prompt.Enabled = false
 				task.delay(E.ResetSeconds, function()
 					refresh(egg)
@@ -234,8 +238,8 @@ local function update()
 	end
 end
 
-function EggService.Start(noiseService: any, hushService: any)
-	noise, hush = noiseService, hushService
+function EggService.Start(noiseService: any, hushService: any, hatchService: any)
+	noise, hush, hatch = noiseService, hushService, hatchService
 	for _, room in ipairs(K.Rooms) do
 		if room.Name == "Mouth" then
 			escapeZ = K.Origin.Z + room.Cell[2] * K.CellSize + K.CellSize / 2 + E.EscapeMargin

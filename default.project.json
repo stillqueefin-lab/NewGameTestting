@@ -13,7 +13,10 @@
         "Toast": { "$className": "RemoteEvent" },
         "NoiseEvent": { "$className": "UnreliableRemoteEvent" },
         "HushCaught": { "$className": "RemoteEvent" },
-        "EggDropPass": { "$className": "RemoteEvent" }
+        "EggDropPass": { "$className": "RemoteEvent" },
+        "HatchReveal": { "$className": "RemoteEvent" },
+        "UsePower": { "$className": "RemoteEvent" },
+        "Listen": { "$className": "RemoteEvent" }
       }
     },
     "ServerScriptService": {

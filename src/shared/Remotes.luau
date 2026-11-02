@@ -11,6 +11,9 @@ local Remotes: { RemoteSpec } = {
 	{ Name = "NoiseEvent", ClassName = "UnreliableRemoteEvent" }, -- server -> client noise ring
 	{ Name = "HushCaught", ClassName = "RemoteEvent" }, -- server -> client: a player was swatted
 	{ Name = "EggDropPass", ClassName = "RemoteEvent" }, -- client -> server: Drop/Pass the egg (Action Guard)
+	{ Name = "HatchReveal", ClassName = "RemoteEvent" }, -- server -> client: play the hatch reveal
+	{ Name = "UsePower", ClassName = "RemoteEvent" }, -- client -> server: hatchling power (Action Guard)
+	{ Name = "Listen", ClassName = "RemoteEvent" }, -- server -> client: show the Hush for a few seconds
 }
 
 return Remotes

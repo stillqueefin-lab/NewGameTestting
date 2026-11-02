@@ -162,14 +162,20 @@ local function showToast(text: string, seconds: number?)
 	end)
 end
 
--- Stubs until their stages: Power (Stage 6, Listen), Ping (Stage 10).
+local remotes = ReplicatedStorage:WaitForChild("SFTBRemotes")
+-- Power: the hatchling's power (Listen). The server checks the hatchling and the cooldown.
+local UsePower = remotes:WaitForChild("UsePower") :: RemoteEvent
 power.Pressed:Connect(function()
-	showToast("Power: your hatchling's power goes here")
+	if player:GetAttribute("SFTB_Hatchling") then
+		UsePower:FireServer()
+	else
+		showToast(Config.Hatch.NoPowerText, 3)
+	end
 end)
+-- Stub until Stage 10.
 ping.Pressed:Connect(function()
 	showToast("Ping: coming soon")
 end)
-local remotes = ReplicatedStorage:WaitForChild("SFTBRemotes")
 local EggDropPass = remotes:WaitForChild("EggDropPass") :: RemoteEvent
 dropPass.Pressed:Connect(function()
 	if player:GetAttribute("SFTB_Carrying") then
@@ -249,6 +255,10 @@ function Controls.Start()
 				hint.Visible = false
 			end
 		end
+		-- Power cooldown shows on the phone button.
+		local readyAt = player:GetAttribute("SFTB_PowerReadyAt")
+		local left = if type(readyAt) == "number" then readyAt - workspace:GetServerTimeNow() else 0
+		powerButton.Text = if left > 0 then tostring(math.ceil(left)) else K.Power.Label
 	end)
 end
 
