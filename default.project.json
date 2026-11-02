@@ -12,7 +12,8 @@
         "StateChanged": { "$className": "RemoteEvent" },
         "Toast": { "$className": "RemoteEvent" },
         "NoiseEvent": { "$className": "UnreliableRemoteEvent" },
-        "HushCaught": { "$className": "RemoteEvent" }
+        "HushCaught": { "$className": "RemoteEvent" },
+        "EggDropPass": { "$className": "RemoteEvent" }
       }
     },
     "ServerScriptService": {

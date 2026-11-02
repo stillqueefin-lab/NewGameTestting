@@ -140,7 +140,9 @@ Config.Hush = {
 	BodyHeight = 30, -- studs; style sheet scale
 	EarForward = 14, -- studs ahead of the body centre where the head and ears are
 	EarReach = 3, -- a noise is heard when its ring radius + this reaches the ears
-	HeardPoints = { Sneak = 0.5, Walk = 1, Run = 2, Bones = 3, Roots = 2, Default = 1 },
+	HeardPoints = { Sneak = 0.5, Walk = 1, Run = 2, Bones = 3, Roots = 2, EggDrop = 3, Default = 1 },
+	ScriptedHuntSpeed = 9, -- first-run scripted chase: slow, and it never catches
+	ScriptedAlertSeconds = 1.5,
 	SuspicionDecay = 0.25, -- points lost per second
 	StirThreshold = 1, -- suspicion points to stir (ears turn, glow lifts, no moving)
 	AlertThreshold = 3, -- suspicion points to alert, then hunt
@@ -183,23 +185,38 @@ Config.Hush = {
 		Bones = "the bones",
 		Roots = "the roots",
 		Touch = "you bump into it",
+		EggDrop = "the egg drop",
 	},
 }
 
--- Stage 4: eggs. Placeholders.
+-- Stage 4: eggs. Lair parts tagged SFTB_Egg are the eggs (attribute EggSize = "Small" | "Big").
 Config.Egg = {
-	SmallSize = 2, -- studs; near-white, slow pulse
+	SmallSize = 2, -- studs; near-white, slow pulse, teal markings
 	BigSize = 4,
 	GrabPromptDistance = 8,
-	DropOnCaught = true,
+	GrabHoldSeconds = 0.3,
+	DropOnCaught = true, -- Stage 11 Rescue can keep it instead (EggService.KeepOnCaught hook)
+	DropNoiseRadius = 22, -- a dropped egg thuds
+	EscapeMargin = 6, -- studs past the cave mouth that count as out
+	ResetSeconds = 5, -- after an escape the egg goes back to its bed (until hatching exists)
+	FirstRunChaseDelay = 3, -- seconds after a player's first grab before the scripted stir
+	SuccessText = "You got out with the egg!",
+	SuccessSeconds = 4,
+	NeedsTwoText = "Too heavy alone. A crewmate can help carry it.",
 }
 
--- Stage 4: carrying. Placeholders.
+-- Stage 4: carrying. Carrying is slower (Controls) and louder (NoiseService).
+-- Big egg: the front carrier holds and steers; the back carrier must stay within
+-- BigHoldDistance of the egg or loses grip and it drops.
 Config.Carry = {
 	SmallSpeedMultiplier = 0.8,
 	BigSpeedMultiplier = 0.65,
+	BigAloneSpeedMultiplier = 0, -- one person can't move the big egg
 	BigCarriers = 2, -- front player steers, back player holds
-	PassDistance = 10,
+	BigHoldDistance = 10,
+	PassDistance = 10, -- Drop/Pass hands a small egg to the nearest free crewmate this close
+	HoldOffset = { Small = Vector3.new(0, 0.3, -2.2), Big = Vector3.new(0, 0.5, -3.6) },
+	DropPassCooldown = 0.5, -- Action Guard interval on the Drop/Pass remote
 }
 
 -- Stages 6 and 8: hatching, Listen power, incubators. Placeholders.

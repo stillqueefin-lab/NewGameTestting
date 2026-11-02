@@ -95,7 +95,10 @@ local function sample(player: Player, state: State, dt: number, now: number)
 		return
 	end
 	state.Speed += (moved / dt - state.Speed) * N.SpeedSmoothing
-	local tier = NoiseService.TierFor(state.Speed)
+	-- Carrying slows you (SFTB_CarrySpeed); read the tier as if you weren't, so a carried run is still a run.
+	local carrySpeed = player:GetAttribute("SFTB_CarrySpeed")
+	local scale = if type(carrySpeed) == "number" and carrySpeed > 0 then carrySpeed else 1
+	local tier = NoiseService.TierFor(state.Speed / scale)
 	if player:GetAttribute("SFTB_NoiseTier") ~= tier then
 		player:SetAttribute("SFTB_NoiseTier", tier) -- replicated, for the client hint and tests
 	end

@@ -37,6 +37,11 @@ local heardFrom: { [Player]: Heard } = {}
 local caught: { [Player]: boolean } = {}
 local swatPlayer: Player? = nil
 local swatReadyAt = 0
+local scripted = false -- first-run scripted chase: slow and never catches
+
+-- Fires (player: Player, feet: Vector3) when the Hush swats someone (EggService drops their egg).
+local caughtSignal = Instance.new("BindableEvent")
+HushService.Caught = caughtSignal.Event
 
 local path = PathfindingService:CreatePath({
 	AgentRadius = H.PathAgentRadius,
@@ -55,6 +60,9 @@ local function flat(v: Vector3): Vector3
 end
 
 local function setState(s: string)
+	if s == "Return" or s == "Sleep" then
+		scripted = false
+	end
 	state, stateAt = s, os.clock()
 	pathGoal = nil
 	model:SetAttribute("State", s)
@@ -202,6 +210,7 @@ local function knockOut(player: Player, reason: string)
 	push = if push.Magnitude > 0.1 then push.Unit else root.CFrame.LookVector
 	local feet = hrp.Position - Vector3.new(0, humanoid.HipHeight + hrp.Size.Y / 2, 0)
 	ragdoll(player.Character :: Model)
+	caughtSignal:Fire(player, feet)
 	HushCaught:FireAllClients(player.UserId, feet, push, reason)
 	target = hrp.Position
 	setState("Search") -- it sniffs at the spot, then loses interest
@@ -234,7 +243,7 @@ end
 
 -- Hunts by sound: only players it heard recently can be caught at reach; bumping into it always counts.
 local function tryCatch(now: number)
-	if swatPlayer or now < swatReadyAt then
+	if scripted or swatPlayer or now < swatReadyAt then
 		return
 	end
 	local head = ears()
@@ -284,7 +293,7 @@ local function update(dt: number)
 		end
 	elseif state == "Alert" then
 		turn(target - root.Position, H.AlertTurnSpeed * dt)
-		if elapsed >= H.AlertSeconds then
+		if elapsed >= (if scripted then H.ScriptedAlertSeconds else H.AlertSeconds) then
 			setState("Hunt")
 		end
 	elseif state == "Hunt" or state == "Search" then
@@ -296,7 +305,13 @@ local function update(dt: number)
 				turn(hrp.Position - root.Position, H.AlertTurnSpeed * dt)
 			end
 		elseif state == "Hunt" then
-			if follow(clampToNest(target), H.HuntSpeed, dt) then
+			if
+				follow(
+					clampToNest(target),
+					if scripted then H.ScriptedHuntSpeed else H.HuntSpeed,
+					dt
+				)
+			then
 				setState("Search")
 			end
 		elseif elapsed >= H.LoseInterestSeconds then
@@ -392,6 +407,19 @@ function HushService.Start(noiseSignal: RBXScriptSignal)
 			update(RunService.Heartbeat:Wait())
 		end
 	end)
+end
+
+-- Stage 4: the short scripted stir and chase on a player's first run, so run 1 almost always
+-- escapes. It plays the full warning and hunt toward the spot, slower, and never catches.
+function HushService.ScriptedChase(position: Vector3)
+	if not model or (state ~= "Sleep" and state ~= "Stir") then
+		return
+	end
+	scripted = true
+	suspicion = H.AlertThreshold
+	lastHeardAt, target = os.clock(), position
+	model:SetAttribute("EarTarget", position)
+	setState("Alert")
 end
 
 return HushService

@@ -10,6 +10,7 @@ local Remotes: { RemoteSpec } = {
 	{ Name = "Toast", ClassName = "RemoteEvent" }, -- server -> client short message
 	{ Name = "NoiseEvent", ClassName = "UnreliableRemoteEvent" }, -- server -> client noise ring
 	{ Name = "HushCaught", ClassName = "RemoteEvent" }, -- server -> client: a player was swatted
+	{ Name = "EggDropPass", ClassName = "RemoteEvent" }, -- client -> server: Drop/Pass the egg (Action Guard)
 }
 
 return Remotes

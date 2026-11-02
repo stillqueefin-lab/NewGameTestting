@@ -27,9 +27,11 @@ local DataService = require(ServerRoot:WaitForChild("Data"):WaitForChild("DataSe
 local Guard = require(ServerRoot:WaitForChild("Infrastructure"):WaitForChild("ActionGuard"))
 local NoiseService = require(ServerRoot:WaitForChild("Noise"):WaitForChild("NoiseService"))
 local HushService = require(ServerRoot:WaitForChild("Hush"):WaitForChild("HushService"))
+local EggService = require(ServerRoot:WaitForChild("Eggs"):WaitForChild("EggService"))
 
 NoiseService.Start()
 HushService.Start(NoiseService.Noise)
+EggService.Start(NoiseService, HushService)
 
 local function onPlayerAdded(player)
 	if DataService.Load(player) then
