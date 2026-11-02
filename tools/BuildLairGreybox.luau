@@ -486,38 +486,66 @@ for _, off in ipairs({
 	bonePile(nest, nestC + off)
 end
 
--- Egg bed right under the beast's nose.
-local eggBed = Instance.new("Model")
-eggBed.Name = "EggBed"
-local eggPos = hushPos + Vector3.new(0, 0, 22)
-for i = 0, 7 do
-	local a = i / 8 * math.pi * 2
-	local p = eggPos + Vector3.new(math.cos(a) * 3.2, 0.5, math.sin(a) * 3.2)
-	part(
-		eggBed,
-		"Twig",
-		Vector3.new(1, 1, 3.4),
-		CFrame.lookAt(p, eggPos + Vector3.new(0, 0.5, 0)) * CFrame.Angles(0, math.pi / 2, 0),
-		C.Roots,
-		{ CanCollide = false }
+-- Eggs on twig beds: near-white loot with a band in the parent's colour (teal, the Hush).
+-- Stage 4: EggService grabs parts tagged SFTB_Egg; EggSize says one carrier or two.
+local function eggOnBed(name, pos, kind)
+	local size = Config.Egg[kind .. "Size"]
+	local bed = Instance.new("Model")
+	bed.Name = name
+	local r = size * 1.6
+	for i = 0, 7 do
+		local a = i / 8 * math.pi * 2
+		local p = pos + Vector3.new(math.cos(a) * r, 0.5, math.sin(a) * r)
+		part(
+			bed,
+			"Twig",
+			Vector3.new(1, 1, r * 1.05),
+			CFrame.lookAt(p, pos + Vector3.new(0, 0.5, 0)) * CFrame.Angles(0, math.pi / 2, 0),
+			C.Roots,
+			{ CanCollide = false }
+		)
+	end
+	local egg = part(
+		bed,
+		"Egg",
+		Vector3.new(size, size, size),
+		CFrame.new(pos + Vector3.new(0, size / 2 + 0.3, 0)),
+		C.Egg,
+		{ Shape = Enum.PartType.Ball, CanCollide = false }
 	)
+	egg:SetAttribute("EggSize", kind)
+	-- The band moves with the egg when it is carried (welded, not anchored).
+	local band = part(
+		bed,
+		"Marking",
+		Vector3.new(size * 0.18, size * 1.02, size * 1.02),
+		egg.CFrame * CFrame.Angles(0, 0, math.pi / 2),
+		C.HushTeal,
+		{
+			Shape = Enum.PartType.Cylinder,
+			Anchored = false,
+			Massless = true,
+			CanCollide = false,
+			CanQuery = false,
+			CanTouch = false,
+		}
+	)
+	band.Parent = egg
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0, weld.Part1 = egg, band
+	weld.Parent = band
+	local eggLight = Instance.new("PointLight")
+	eggLight.Color = C.Egg
+	eggLight.Range = size * 4
+	eggLight.Brightness = 0.8
+	eggLight.Shadows = false
+	eggLight.Parent = egg
+	CollectionService:AddTag(egg, "SFTB_Egg")
+	bed.Parent = nest
 end
-local egg = part(
-	eggBed,
-	"Egg",
-	Vector3.new(2, 2, 2),
-	CFrame.new(eggPos + Vector3.new(0, 1.3, 0)),
-	C.Egg,
-	{ Shape = Enum.PartType.Ball, CanCollide = false }
-)
-local eggLight = Instance.new("PointLight")
-eggLight.Color = C.Egg
-eggLight.Range = 8
-eggLight.Brightness = 0.8
-eggLight.Shadows = false
-eggLight.Parent = egg
-CollectionService:AddTag(egg, "SFTB_Egg")
-eggBed.Parent = nest
+-- Small egg right under the beast's nose; the big two-carrier egg deeper in, behind it.
+eggOnBed("EggBed", hushPos + Vector3.new(0, 0, 22), "Small")
+eggOnBed("BigEggBed", nestC + Vector3.new(-20, 0, -38), "Big")
 
 -- The Hush stand-in: one chunky mass, eyeless, oversized teal ears, tiny claws (~30 studs tall).
 local hush = Instance.new("Model")
