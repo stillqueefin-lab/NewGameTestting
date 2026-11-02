@@ -58,7 +58,8 @@ local function toSpawn(player: Player, run: Run, index: number)
 end
 
 -- Start a run for up to MaxCrew players. Returns false if every lair slot is busy.
-function LairService.StartRun(players: { Player }): boolean
+-- spawnAt "NestDoor" starts inside the nest door (Stage 10 onboarding) instead of the mouth.
+function LairService.StartRun(players: { Player }, spawnAt: string?): boolean
 	local slot = nil
 	for i = 1, Cr.MaxLairs do
 		if not slots[i] then
@@ -92,7 +93,9 @@ function LairService.StartRun(players: { Player }): boolean
 	local run: Run = {
 		Lair = lair,
 		Hush = hush,
-		Spawn = spawn,
+		Spawn = if spawnAt == "NestDoor"
+			then lair:GetAttribute("NestDoorSpawn") :: CFrame
+			else spawn,
 		EscapeZ = lair:GetAttribute("EscapeZ") :: number,
 		Slot = slot,
 		Members = {},

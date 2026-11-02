@@ -172,9 +172,101 @@ power.Pressed:Connect(function()
 		showToast(Config.Hatch.NoPowerText, 3)
 	end
 end)
--- Stub until Stage 10.
+---------------------------------------------------------------------------------------------
+-- Stage 10: the ping wheel. Ping opens four choices (keys 1-4, D-pad, or tap); the ping lands
+-- where you were aiming when you opened it (mouse, or the screen centre on stick/touch).
+local P = Config.Pings
+local PingRemote = remotes:WaitForChild("Ping") :: RemoteEvent
+local wheel = Instance.new("Frame")
+wheel.Name = "PingWheel"
+wheel.AnchorPoint = Vector2.new(0.5, 0.5)
+wheel.Position = UDim2.fromScale(0.5, 0.5)
+wheel.Size = UDim2.fromScale(0.34, 0.34)
+wheel.SizeConstraint = Enum.SizeConstraint.RelativeYY
+wheel.BackgroundTransparency = 1
+wheel.Visible = false
+wheel.Parent = gui
+local wheelSpots = {
+	UDim2.fromScale(0.5, 0.12),
+	UDim2.fromScale(0.88, 0.5),
+	UDim2.fromScale(0.5, 0.88),
+	UDim2.fromScale(0.12, 0.5),
+}
+local options: { InputAction } = {}
+local aimAt = Vector3.zero
+local wheelToken = 0
+
+local function aimPoint(): Vector3
+	local camera = workspace.CurrentCamera
+	local at = if preferred() == "KeyboardAndMouse"
+		then UserInputService:GetMouseLocation()
+		else camera.ViewportSize / 2
+	local ray = camera:ViewportPointToRay(at.X, at.Y)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { player.Character :: Instance, camera }
+	local hit = workspace:Raycast(ray.Origin, ray.Direction * P.Range * 1.5, params)
+	return if hit then hit.Position else ray.Origin + ray.Direction * P.Range
+end
+
+local function setWheel(open: boolean)
+	wheel.Visible = open
+	for _, option in ipairs(options) do
+		option.Enabled = open
+	end
+	if open then
+		wheelToken += 1
+		local mine = wheelToken
+		task.delay(P.WheelSeconds, function()
+			if wheelToken == mine then
+				setWheel(false)
+			end
+		end)
+	end
+end
+
+for i, kind in ipairs(P.Kinds) do
+	local b = Instance.new("TextButton")
+	b.Name = kind
+	b.Text = ("%d  %s"):format(i, P.Labels[kind])
+	b.AnchorPoint = Vector2.new(0.5, 0.5)
+	b.Position = wheelSpots[i]
+	b.Size = UDim2.fromScale(0.42, 0.2)
+	b.BackgroundColor3 = Color3.fromRGB(20, 24, 22)
+	b.BackgroundTransparency = 0.3
+	b.FontFace = Font.fromEnum(Enum.Font.GothamMedium)
+	b.TextColor3 = P.Color
+	b.TextScaled = true
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0.3, 0)
+	corner.Parent = b
+	local stroke = Instance.new("UIStroke")
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	stroke.Color = P.Color
+	stroke.Transparency = 0.4
+	stroke.Parent = b
+	b.Parent = wheel
+	local option = action("Ping" .. kind)
+	bind(option, P.Keys[i])
+	bind(option, P.Pad[i])
+	bind(option, nil, b)
+	option.Enabled = false
+	option.Pressed:Connect(function()
+		if wheel.Visible then
+			setWheel(false)
+			PingRemote:FireServer(kind, aimAt)
+		end
+	end)
+	table.insert(options, option)
+end
+
 ping.Pressed:Connect(function()
-	showToast("Ping: coming soon")
+	if wheel.Visible then
+		setWheel(false)
+	else
+		aimAt = aimPoint()
+		setWheel(true)
+	end
 end)
 local EggDropPass = remotes:WaitForChild("EggDropPass") :: RemoteEvent
 dropPass.Pressed:Connect(function()

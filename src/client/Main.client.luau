@@ -17,6 +17,8 @@ require(Effects:WaitForChild("HushView")).Start()
 require(Effects:WaitForChild("HatchView")).Start()
 require(Effects:WaitForChild("ZoneLighting")).Start()
 require(Effects:WaitForChild("CampView")).Start()
+require(Effects:WaitForChild("PingView")).Start()
+require(Effects:WaitForChild("Objective")).Start()
 require(script.Parent:WaitForChild("Controls"):WaitForChild("Controls")).Start()
 
 print("[SFTB] Client ready")

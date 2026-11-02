@@ -14,6 +14,8 @@ local Remotes: { RemoteSpec } = {
 	{ Name = "HatchReveal", ClassName = "RemoteEvent" }, -- server -> client: play the hatch reveal
 	{ Name = "UsePower", ClassName = "RemoteEvent" }, -- client -> server: hatchling power (Action Guard)
 	{ Name = "Listen", ClassName = "RemoteEvent" }, -- server -> client: show the Hush for a few seconds
+	{ Name = "Ping", ClassName = "RemoteEvent" }, -- client -> server: a ping where you aim (Action Guard)
+	{ Name = "PingShow", ClassName = "RemoteEvent" }, -- server -> client: show a crewmate's ping
 }
 
 return Remotes

@@ -321,6 +321,50 @@ Config.Lighting = {
 	BlendSeconds = 1,
 }
 
+-- Stage 10: pings. Ping opens a small wheel (works without chat); the ping lands where you
+-- aim and your crew sees it for a few seconds. Amber = us (light language).
+Config.Pings = {
+	Kinds = { "Here", "Egg", "Danger", "Help" }, -- wheel order: up, right, down, left
+	Labels = { Here = "HERE", Egg = "EGG", Danger = "DANGER", Help = "HELP" },
+	Keys = { Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three, Enum.KeyCode.Four },
+	Pad = {
+		Enum.KeyCode.DPadUp,
+		Enum.KeyCode.DPadRight,
+		Enum.KeyCode.DPadDown,
+		Enum.KeyCode.DPadLeft,
+	},
+	Color = Color3.fromRGB(255, 179, 71), -- #FFB347, crew amber
+	Range = 90, -- studs: how far from you a ping can land
+	EggSnap = 25, -- an Egg ping snaps to an egg this close to where you aimed
+	ShareRadius = 150, -- crewmates and players this close see it
+	Seconds = 5, -- how long a marker stays
+	Interval = 1, -- Action Guard interval on the Ping remote
+	WheelSeconds = 3, -- the wheel closes itself after this
+}
+
+-- Stage 10: the first two minutes (kickoff "First 2 minutes"). A brand-new player skips camp
+-- and starts a solo run just inside the nest door, the sleeping Hush and the egg in view.
+-- One objective line at a time; funnel steps go to the Analytics onboarding funnel.
+Config.Onboarding = {
+	Objective = {
+		Grab = "Grab the egg. Don't wake it.",
+		GetOut = "Sneak out the way you came.",
+		Listen = "Your Hushling can Listen for the Hush.",
+		Crew = "Bigger egg deeper in. Needs two. Stand on a crew pad with a friend.",
+	},
+	CrewHintDelay = 6, -- seconds after the first hatch before the big-egg hint
+	ObjectiveSeconds = 12, -- the last hint fades after this
+	Funnel = { -- step number = order
+		"Spawned in the lair",
+		"Grabbed the egg",
+		"Escaped with the egg",
+		"Hatched a Hushling",
+		"Used Listen",
+		"Saw the big-egg hint",
+		"Started a crew run",
+	},
+}
+
 -- Stage 11: shop. Prices are read live from Roblox; only ids live here.
 Config.Shop = {
 	RescueProductId = 0, -- developer product, about 25-45 Robux

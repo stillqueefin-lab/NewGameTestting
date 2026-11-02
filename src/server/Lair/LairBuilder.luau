@@ -608,6 +608,9 @@ function LairBuilder.Build(origin: Vector3, seed: number?, config: any?)
 	-- mouth") and the line past the mouth that counts as out.
 	local spawn = CFrame.lookAt(mouthC + Vector3.new(0, 3, 12), mouthC + Vector3.new(0, 3, -100))
 	lair:SetAttribute("Spawn", spawn)
+	-- Stage 10: a brand-new player's first run starts just inside nest door A, egg in view.
+	local eggAt = hushPos + Vector3.new(0, 3, 22)
+	lair:SetAttribute("NestDoorSpawn", CFrame.lookAt(doorA + Vector3.new(0, 3, -6), eggAt))
 	lair:SetAttribute("EscapeZ", mouthC.Z + half + Config.Egg.EscapeMargin)
 	return lair, spawn
 end

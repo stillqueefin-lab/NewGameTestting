@@ -31,6 +31,9 @@ local EggService = require(ServerRoot:WaitForChild("Eggs"):WaitForChild("EggServ
 local HatchService = require(ServerRoot:WaitForChild("Hatch"):WaitForChild("HatchService"))
 local LairService = require(ServerRoot:WaitForChild("Lair"):WaitForChild("LairService"))
 local CampService = require(ServerRoot:WaitForChild("Camp"):WaitForChild("CampService"))
+local PingService = require(ServerRoot:WaitForChild("Pings"):WaitForChild("PingService"))
+local OnboardingService =
+	require(ServerRoot:WaitForChild("Onboarding"):WaitForChild("OnboardingService"))
 
 LairService.Start(HushService, EggService, HatchService) -- clears the Edit preview lair first
 NoiseService.Start()
@@ -38,11 +41,14 @@ HushService.Start(NoiseService.Noise)
 HatchService.Start()
 EggService.Start(NoiseService, HatchService)
 CampService.Start(LairService)
+PingService.Start(LairService)
+OnboardingService.Start(LairService)
 
 local function onPlayerAdded(player)
 	if DataService.Load(player) then
 		DataService.Push(player)
 		HatchService.Loaded(player)
+		OnboardingService.Loaded(player) -- brand-new players go straight into a lair
 	end
 end
 

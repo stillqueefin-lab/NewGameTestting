@@ -16,7 +16,9 @@
         "EggDropPass": { "$className": "RemoteEvent" },
         "HatchReveal": { "$className": "RemoteEvent" },
         "UsePower": { "$className": "RemoteEvent" },
-        "Listen": { "$className": "RemoteEvent" }
+        "Listen": { "$className": "RemoteEvent" },
+        "Ping": { "$className": "RemoteEvent" },
+        "PingShow": { "$className": "RemoteEvent" }
       }
     },
     "ServerScriptService": {
