@@ -19,6 +19,7 @@ type Run = {
 	EscapeZ: number,
 	Slot: number,
 	Members: { [Player]: boolean },
+	Arriving: { [Player]: boolean }, -- being moved in (still at camp): not 'left' yet
 }
 
 local LairService = {}
@@ -53,8 +54,10 @@ local function toSpawn(player: Player, run: Run, index: number)
 	if not character then
 		return
 	end
+	run.Arriving[player] = true
 	pcall(player.RequestStreamAroundAsync, player, run.Spawn.Position)
 	character:PivotTo(run.Spawn * CFrame.new((index - 1) * 3 - 4.5, 0, 0))
+	run.Arriving[player] = nil
 end
 
 -- Start a run for up to MaxCrew players. Returns false if every lair slot is busy.
@@ -99,6 +102,7 @@ function LairService.StartRun(players: { Player }, spawnAt: string?): boolean
 		EscapeZ = lair:GetAttribute("EscapeZ") :: number,
 		Slot = slot,
 		Members = {},
+		Arriving = {},
 	}
 	slots[slot] = run
 	for i, player in ipairs(players) do
@@ -123,6 +127,9 @@ local function check()
 			local character = player.Character
 			local pos = character and character:GetPivot().Position
 			-- Left the game, or escaped with an egg (HatchService took them to camp).
+			if run.Arriving[player] and player.Parent then
+				continue
+			end
 			if not player.Parent or (pos and atCamp(pos)) then
 				leave(player, run)
 			elseif pos and pos.Z > run.EscapeZ and not player:GetAttribute("SFTB_Carrying") then
@@ -153,6 +160,7 @@ function LairService.Start(hush: any, eggs: any, hatch: any)
 		player.CharacterAdded:Connect(function(character)
 			local run = runs[player]
 			if run then
+				run.Arriving[player] = true
 				-- Caught: back at your lair's mouth, still in the run.
 				character:WaitForChild("HumanoidRootPart", 5)
 				task.wait()
