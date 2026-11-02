@@ -9,6 +9,7 @@ local Remotes: { RemoteSpec } = {
 	{ Name = "StateChanged", ClassName = "RemoteEvent" }, -- server -> client profile state
 	{ Name = "Toast", ClassName = "RemoteEvent" }, -- server -> client short message
 	{ Name = "NoiseEvent", ClassName = "UnreliableRemoteEvent" }, -- server -> client noise ring
+	{ Name = "HushCaught", ClassName = "RemoteEvent" }, -- server -> client: a player was swatted
 }
 
 return Remotes

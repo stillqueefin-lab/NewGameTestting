@@ -11,7 +11,8 @@
         "$className": "Folder",
         "StateChanged": { "$className": "RemoteEvent" },
         "Toast": { "$className": "RemoteEvent" },
-        "NoiseEvent": { "$className": "UnreliableRemoteEvent" }
+        "NoiseEvent": { "$className": "UnreliableRemoteEvent" },
+        "HushCaught": { "$className": "RemoteEvent" }
       }
     },
     "ServerScriptService": {

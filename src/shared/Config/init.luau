@@ -132,16 +132,58 @@ Config.Controls = {
 	StubToastSeconds = 1.5, -- Power and Ping are stubs until Stages 6 and 10
 }
 
--- Stage 3: The Hush (hunts by sound only). Placeholders.
+-- Stage 3: The Hush (hunts by sound only). Starting values; tune in Play.
+-- Hearing rule players can read: if a noise ring reaches its ears, it heard you.
+-- Each heard noise adds suspicion points; enough points stir it, more alert it.
+-- It always plays Alert (the warning) before it hunts. It stays in the nest (too big for the doors).
 Config.Hush = {
 	BodyHeight = 30, -- studs; style sheet scale
-	HearingRadius = 60,
-	StirThreshold = 1, -- noise events before it stirs
-	AlertThreshold = 3,
-	AlertSeconds = 2, -- warning before every scare
-	HuntSpeed = 20,
-	LoseInterestSeconds = 8,
-	BackToSleepSeconds = 15,
+	EarForward = 14, -- studs ahead of the body centre where the head and ears are
+	EarReach = 3, -- a noise is heard when its ring radius + this reaches the ears
+	HeardPoints = { Sneak = 0.5, Walk = 1, Run = 2, Bones = 3, Roots = 2, Default = 1 },
+	SuspicionDecay = 0.25, -- points lost per second
+	StirThreshold = 1, -- suspicion points to stir (ears turn, glow lifts, no moving)
+	AlertThreshold = 3, -- suspicion points to alert, then hunt
+	AlertSeconds = 2, -- warning before every scare: glow pulses, ears snap, body turns, no moving
+	HuntSpeed = 16, -- studs/s; a runner (18) can outrun it, a walker (12) can't
+	ReturnSpeed = 8,
+	TurnSpeed = 1.6, -- radians/s while moving; a big body turns slowly
+	AlertTurnSpeed = 3,
+	LoseInterestSeconds = 8, -- searching at the last noise before it gives up
+	BackToSleepSeconds = 15, -- quiet time before a stirred Hush settles back to sleep
+	NestInset = 18, -- keeps the body centre this far inside the nest walls
+	PathAgentRadius = 6,
+	ArriveDistance = 4,
+	StuckSeconds = 2.5, -- no progress this long while moving: give up and search there
+	CatchRadius = 10, -- from the head, for players it heard in the last NoisyMemorySeconds
+	TouchRadius = 13, -- from the body centre; walking into it always counts
+	NoisyMemorySeconds = 2.5,
+	SwatWindup = 0.5, -- seconds between the wind-up and the blow (dodge window)
+	SwatReach = 13, -- still this close to the head when the swat lands
+	SwatCooldown = 1.5,
+	SwatForce = 55, -- studs/s shove on the ragdoll
+	CaughtSeconds = 3, -- ragdoll time before you respawn at the mouth
+	SlimeSeconds = 8,
+	SlimeColor = Color3.fromHex("4FE3D0"), -- beast-coloured slime (Mild, no blood)
+	-- Client look: glow level and ear pitch per state (negative pitch = ears laid back).
+	Glow = { Sleep = 0.35, Stir = 0.7, Alert = 1.6, Hunt = 1.3, Search = 1, Return = 0.6 },
+	EarPitch = { Sleep = -0.9, Stir = -0.4, Alert = 0.15, Hunt = 0.1, Search = 0, Return = -0.5 },
+	PulseStates = { Alert = true, Hunt = true },
+	PulseSpeed = 8, -- radians/s of the alert pulse
+	PulseAmount = 0.35,
+	EarYawMax = 1.0, -- radians the ears can turn toward a noise
+	EarSnapSpeed = 14, -- how fast ears follow in Alert/Hunt (others: EarEaseSpeed)
+	EarEaseSpeed = 3,
+	LightBrightness = 1.5, -- the body glow light at glow level 1
+	CaughtText = "Caught! It heard %s.",
+	HeardText = {
+		Sneak = "you sneak too close",
+		Walk = "you walking",
+		Run = "you running",
+		Bones = "the bones",
+		Roots = "the roots",
+		Touch = "you bump into it",
+	},
 }
 
 -- Stage 4: eggs. Placeholders.

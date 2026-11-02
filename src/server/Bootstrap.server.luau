@@ -26,8 +26,10 @@ local Config = require(SharedRoot:WaitForChild("Config"))
 local DataService = require(ServerRoot:WaitForChild("Data"):WaitForChild("DataService"))
 local Guard = require(ServerRoot:WaitForChild("Infrastructure"):WaitForChild("ActionGuard"))
 local NoiseService = require(ServerRoot:WaitForChild("Noise"):WaitForChild("NoiseService"))
+local HushService = require(ServerRoot:WaitForChild("Hush"):WaitForChild("HushService"))
 
 NoiseService.Start()
+HushService.Start(NoiseService.Noise)
 
 local function onPlayerAdded(player)
 	if DataService.Load(player) then
