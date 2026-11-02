@@ -46,7 +46,6 @@ end
 
 local eggs: { Egg } = {}
 local holding: { [Player]: Egg } = {}
-local hasRun: { [Player]: boolean } = {} -- this session; Stage 8 saves it
 local noise: any -- NoiseService
 local hatch: any -- HatchService
 
@@ -152,8 +151,8 @@ local function grab(egg: Egg, player: Player)
 		return
 	end
 	refresh(egg)
-	if not hasRun[player] then
-		hasRun[player] = true
+	if not player:GetAttribute("SFTB_FirstRunDone") then
+		hatch.FirstRunDone(player) -- saved: the scripted chase happens once per player
 		task.delay(E.FirstRunChaseDelay, function()
 			local hrp = hrpOf(player)
 			if hrp and holding[player] and egg.Hush then
@@ -290,7 +289,6 @@ function EggService.Start(noiseService: any, hatchService: any)
 		if egg then
 			EggService.Drop(egg, nil)
 		end
-		hasRun[player] = nil
 	end)
 	RunService.Heartbeat:Connect(update)
 end

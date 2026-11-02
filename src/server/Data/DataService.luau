@@ -143,7 +143,7 @@ function DataService.GetClientState(player)
 		return nil
 	end
 	local state = {}
-	for _, key in ipairs({ "Hatchlings", "Incubators", "CrewLevel" }) do
+	for _, key in ipairs({ "Hatchlings", "Incubators", "CrewLevel", "Escapes" }) do
 		state[key] = Schema.Copy(data[key])
 	end
 	local session = sessions[player]

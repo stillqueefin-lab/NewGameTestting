@@ -8,6 +8,7 @@ for _, spec in ipairs(require(SharedRoot:WaitForChild("Remotes")) :: any) do
 	remoteFolder:WaitForChild(spec.Name)
 end
 
+require(script.Parent:WaitForChild("State")) -- first, so the first saved state isn't missed
 local Effects = script.Parent:WaitForChild("Effects")
 require(Effects:WaitForChild("Flashlight")).Start()
 require(Effects:WaitForChild("EggPulse")).Start()
@@ -15,6 +16,7 @@ require(Effects:WaitForChild("NoiseRings")).Start()
 require(Effects:WaitForChild("HushView")).Start()
 require(Effects:WaitForChild("HatchView")).Start()
 require(Effects:WaitForChild("ZoneLighting")).Start()
+require(Effects:WaitForChild("CampView")).Start()
 require(script.Parent:WaitForChild("Controls"):WaitForChild("Controls")).Start()
 
 print("[SFTB] Client ready")

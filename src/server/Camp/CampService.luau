@@ -52,6 +52,24 @@ local function sign(parent: BasePart, text: string, height: number): TextLabel
 end
 
 local function build()
+	-- Stage 8: the block-out's incubator eggs and pen pet are props; real ones are drawn per
+	-- player (CampView), so the props go at run time (the place keeps them in Edit).
+	local mockCamp = workspace:FindFirstChild("SFTB_Mockup")
+		and workspace.SFTB_Mockup:FindFirstChild("Camp")
+	if mockCamp then
+		local pet = mockCamp:FindFirstChild("Hatchlings")
+		if pet then
+			pet:Destroy()
+		end
+		local incubators = mockCamp:FindFirstChild("Incubators")
+		for _, d in ipairs(incubators and incubators:GetDescendants() or {}) do
+			if
+				d:IsA("BasePart") and (d.Name == "Egg" or d.Name == "Crack" or d.Name == "Speck")
+			then
+				d:Destroy()
+			end
+		end
+	end
 	local folder = Instance.new("Folder")
 	folder.Name = "SFTB_CampHub"
 	for i, pos in ipairs(Camp.Pads) do

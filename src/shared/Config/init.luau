@@ -220,12 +220,30 @@ Config.Carry = {
 }
 
 -- Stages 6 and 8: hatching, Listen power, incubators.
--- Escape with an egg: the crew is taken to camp and it hatches with the egg build-up
--- (wobble, harder wobble, swell, white flash, pop). The Hushling follows its owner.
+-- Escape with an egg: the crew is taken to camp. Your very first egg hatches there and then
+-- (onboarding); later eggs go into an incubator and hatch when the timer is done, even
+-- while you're offline. Hatchlings grow with time (also offline): grown ones Listen longer.
 Config.Hatch = {
 	FreeIncubatorSlots = 2,
-	MaxIncubatorSlots = 4,
-	HatchSeconds = 600,
+	MaxIncubatorSlots = 4, -- slot 3 by crew level, slot 4 by game pass (Stage 11)
+	FreeSlotLevel = 5, -- crew level that opens incubator slot 3
+	EscapesPerLevel = 2, -- crew level = 1 + escapes / this
+	HatchSeconds = { Small = 120, Big = 240 }, -- test values for fun tests (plan guess: 600)
+	-- Egg spots on the block-out incubators' straw (slot order).
+	IncubatorSpots = {
+		Vector3.new(394, 2.5, 12),
+		Vector3.new(399, 2.5, 15),
+		Vector3.new(404, 2.5, -12),
+	},
+	NotReadyText = "Not ready yet: %s left.",
+	IncubatedText = "Egg in the incubator. Ready in %s.",
+	FullText = "Incubators full, so it hatched right away.",
+	ReadyText = "Ready!",
+	GrowSeconds = 1800, -- from hatch to fully grown
+	GrowStartScale = 0.7, -- a fresh Hushling's size (grown = 1)
+	ListenSecondsGrown = 6,
+	PenCentre = Vector3.new(409, 0, 8), -- your other hatchlings idle here
+	PenRadius = 4,
 	ListenSeconds = 4, -- the Hush shows through walls this long
 	ListenCooldown = 30,
 	ListenShareRadius = 60, -- crewmates this close see it too

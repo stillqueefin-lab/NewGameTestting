@@ -10,6 +10,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Config = require(ReplicatedStorage:WaitForChild("SFTBShared"):WaitForChild("Config"))
+local HushlingModel = require(script.Parent:WaitForChild("HushlingModel"))
 local remotes = ReplicatedStorage:WaitForChild("SFTBRemotes")
 local HatchReveal = remotes:WaitForChild("HatchReveal") :: RemoteEvent
 local Listen = remotes:WaitForChild("Listen") :: RemoteEvent
@@ -17,7 +18,6 @@ local Listen = remotes:WaitForChild("Listen") :: RemoteEvent
 local H = Config.Hatch
 local TEAL = Config.Hush.SlimeColor
 local EGG_WHITE = Color3.fromHex("F1F4EC")
-local BODY = Color3.fromHex("3A4440")
 local player = Players.LocalPlayer
 
 local HatchView = {}
@@ -50,37 +50,6 @@ local function part(
 	return p
 end
 
--- A small Hush: big head, big low eyes, stubby legs, the parent's teal ears. About 2.5 tall.
-local function makeHushling(): Model
-	local m = Instance.new("Model")
-	m.Name = "Hushling"
-	local body = part(m, "Body", Vector3.new(1.6, 1.1, 1.8), CFrame.new(0, 0.95, 0), BODY)
-	m.PrimaryPart = body
-	part(m, "Head", Vector3.new(1.7, 1.7, 1.7), CFrame.new(0, 1.75, -0.8), BODY, Enum.PartType.Ball)
-	for _, sx in ipairs({ -1, 1 }) do
-		local ear = part(
-			m,
-			"Ear",
-			Vector3.new(0.35, 1.5, 0.7),
-			CFrame.new(sx * 0.45, 2.85, -0.75) * CFrame.Angles(0, 0, -sx * 0.4),
-			TEAL
-		)
-		ear.Material = Enum.Material.Neon
-		part(
-			m,
-			"Eye",
-			Vector3.new(0.5, 0.5, 0.5),
-			CFrame.new(sx * 0.38, 1.55, -1.55),
-			H.EyeColor,
-			Enum.PartType.Ball
-		)
-		for _, sz in ipairs({ -1, 1 }) do
-			part(m, "Leg", Vector3.new(0.4, 0.45, 0.4), CFrame.new(sx * 0.5, 0.22, sz * 0.55), BODY)
-		end
-	end
-	return m
-end
-
 local function say(text: string, seconds: number)
 	banner.Text = text
 	banner.Visible = true
@@ -92,11 +61,11 @@ local function say(text: string, seconds: number)
 end
 
 ---------------------------------------------------------------------------------------------
--- Followers: one Hushling per player who has one.
+-- Followers: one Hushling per player who has one, sized by how grown it is.
 local function follow(owner: Player)
 	local model: Model? = nil
 	local pos: Vector3? = nil
-	local blinkAt = os.clock() + H.BlinkEvery
+	local scale = 1
 	local function clear()
 		if model then
 			model:Destroy()
@@ -122,7 +91,7 @@ local function follow(owner: Player)
 		local goal = (hrp.CFrame * CFrame.new(H.FollowOffset)).Position
 		goal = Vector3.new(goal.X, feetY, goal.Z)
 		if not model then
-			model = makeHushling()
+			model = HushlingModel.new()
 			pos = spawnAt[owner.UserId] or goal
 			spawnAt[owner.UserId] = nil
 			(model :: Model).Parent = workspace.CurrentCamera
@@ -136,20 +105,13 @@ local function follow(owner: Player)
 		if face.Magnitude < 0.01 then
 			face = Vector3.zAxis
 		end
-		local bob = math.sin(os.clock() * H.BreatheSpeed) * H.BreatheAmount
 		local m = model :: Model
-		m:PivotTo(CFrame.lookAt(current, current + face.Unit) * CFrame.new(0, 0.95 + bob, 0))
-		-- Blink: eyes vanish for a moment every few seconds.
-		local now = os.clock()
-		local blinking = now >= blinkAt and now < blinkAt + 0.12
-		if now >= blinkAt + 0.12 then
-			blinkAt = now + H.BlinkEvery * (0.7 + math.random() * 0.6)
+		local want = HushlingModel.ScaleFor(owner:GetAttribute("SFTB_HatchlingBorn") :: number?)
+		if math.abs(want - scale) > 0.01 then
+			scale = want
+			m:ScaleTo(scale)
 		end
-		for _, child in ipairs(m:GetChildren()) do
-			if child.Name == "Eye" and child:IsA("BasePart") then
-				child.Transparency = if blinking then 1 else 0
-			end
-		end
+		HushlingModel.Place(m, current, face.Unit, scale)
 	end)
 end
 
@@ -216,7 +178,7 @@ local function reveal(eggSize: string)
 	task.wait(0.12)
 	-- Pop: the Hushling springs out where the egg was.
 	egg:Destroy()
-	local baby = makeHushling()
+	local baby = HushlingModel.new()
 	baby:PivotTo(CFrame.lookAt(spot, spot - look) * CFrame.new(0, 0.95, 0))
 	baby.Parent = holder
 	local scale = Instance.new("NumberValue")
