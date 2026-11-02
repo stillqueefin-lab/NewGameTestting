@@ -365,23 +365,88 @@ function LairBuilder.Build(origin: Vector3, seed: number?, config: any?)
 	strip(lair, doorPS, sideC, 6)
 	strip(lair, sideC, doorB, 6) -- route B
 
-	-- One root tangle (noise trap) on each route, on the soil path so it can be stepped round.
-	rootTangle(roomModels.Path, Vector3.new(pathC.X, base.Y, pathC.Z - 12)) -- route A
-	rootTangle(roomModels.Side, Vector3.new(sideC.X, base.Y, sideC.Z - 12)) -- route B
-
-	-- Hiding spots: one on each route, plus one by each nest door.
+	-- Hiding spots: at least one in each slot room (from its kit), plus one by each nest door.
 	local spots = Instance.new("Folder")
 	spots.Name = "HidingSpots"
-	hollow(
-		spots,
-		"Hollow_Path",
-		CFrame.lookAt(pathC + Vector3.new(half - 8, 0, 6), pathC + Vector3.new(-100, 0, 6))
-	)
-	hollow(
-		spots,
-		"Hollow_Side",
-		CFrame.lookAt(sideC + Vector3.new(-half + 8, 0, 4), sideC + Vector3.new(100, 0, 4))
-	)
+
+	-- Stage 9: the slot rooms (Path, Side) each get a different kit, shuffled per run. Kits keep
+	-- the door-to-door soil paths clear: things go in the corners or just off the path.
+	local inset = K.CornerInset
+	local corners = {
+		Vector3.new(-inset, 0, -inset),
+		Vector3.new(inset, 0, -inset),
+		Vector3.new(inset, 0, inset),
+		Vector3.new(-inset, 0, inset),
+	}
+	local function shuffled(list)
+		local out = table.clone(list)
+		for i = #out, 2, -1 do
+			local j = rng:NextInteger(1, i)
+			out[i], out[j] = out[j], out[i]
+		end
+		return out
+	end
+	local function pillar(room, c, off, h)
+		part(
+			room,
+			"RootPillar",
+			Vector3.new(5, h, 5),
+			CFrame.new(c + off + Vector3.new(0, h / 2, 0))
+				* CFrame.Angles(0, rng:NextNumber(0, 1.5), 0),
+			C.Roots
+		)
+	end
+	local function hollowIn(roomName, c, corner, n)
+		local m = hollow(spots, roomName .. "_Hollow" .. n, CFrame.lookAt(c + corner, c))
+		m:SetAttribute("Room", roomName)
+	end
+	local KITS = {
+		-- A root tangle across the way to the nest, roots in the corners.
+		Roots = function(room, c, roomName)
+			local cs = shuffled(corners)
+			hollowIn(roomName, c, cs[1], 1)
+			pillar(room, c, cs[2], K.RoomHeight)
+			pillar(room, c, cs[3], K.RoomHeight)
+			rootTangle(room, c + Vector3.new(0, 0, -12))
+		end,
+		-- Bones scattered just off the path; easy to step on if you rush.
+		Bones = function(room, c, roomName)
+			local cs = shuffled(corners)
+			hollowIn(roomName, c, cs[1], 1)
+			bonePile(room, c + Vector3.new(6, 0, -7))
+			bonePile(room, c + Vector3.new(-7, 0, 6))
+		end,
+		-- Thick root pillars break the room up; one tangle in the near half.
+		Pillars = function(room, c, roomName)
+			local cs = shuffled(corners)
+			hollowIn(roomName, c, cs[1], 1)
+			for _, off in ipairs({
+				Vector3.new(-9, 0, -9),
+				Vector3.new(9, 0, -9),
+				Vector3.new(9, 0, 9),
+				Vector3.new(-9, 0, 9),
+			}) do
+				pillar(room, c, off, K.RoomHeight)
+			end
+			rootTangle(room, c + Vector3.new(0, 0, 11))
+		end,
+		-- Two hollows to hide in, one bone pile in the middle.
+		Hollows = function(room, c, roomName)
+			local cs = shuffled(corners)
+			hollowIn(roomName, c, cs[1], 1)
+			hollowIn(roomName, c, cs[2], 2)
+			bonePile(room, c + Vector3.new(4, 0, -8))
+		end,
+	}
+	local kits = shuffled(K.Kits)
+	local layout = {}
+	for i, roomName in ipairs(K.SlotRooms) do
+		local kitName = kits[i]
+		KITS[kitName](roomModels[roomName], centreOf(roomName), roomName)
+		table.insert(layout, roomName .. ":" .. kitName)
+	end
+	lair:SetAttribute("Layout", table.concat(layout, ", "))
+
 	hollow(
 		spots,
 		"Hollow_NestA",
@@ -545,6 +610,65 @@ function LairBuilder.Build(origin: Vector3, seed: number?, config: any?)
 	lair:SetAttribute("Spawn", spawn)
 	lair:SetAttribute("EscapeZ", mouthC.Z + half + Config.Egg.EscapeMargin)
 	return lair, spawn
+end
+
+-- Stage 9 fairness check: at least two routes from the mouth to the nest through the door
+-- graph, and every route passes a room with a hiding spot (not counting the mouth or nest).
+function LairBuilder.Fair(lair: Model, config: any?): (boolean, string)
+	local Config = config
+		or require(ReplicatedStorage:WaitForChild("SFTBShared"):WaitForChild("Config"))
+	local K = Config.Lair
+	local roomAt = {}
+	for _, room in ipairs(K.Rooms) do
+		for dx = 0, room.Size[1] - 1 do
+			for dz = 0, room.Size[2] - 1 do
+				roomAt[key(room.Cell[1] + dx, room.Cell[2] + dz)] = room.Name
+			end
+		end
+	end
+	local links: { [string]: { string } } = {}
+	for _, d in ipairs(K.Doors) do
+		local a, b = roomAt[key(d[1][1], d[1][2])], roomAt[key(d[2][1], d[2][2])]
+		links[a] = links[a] or {}
+		links[b] = links[b] or {}
+		table.insert(links[a], b)
+		table.insert(links[b], a)
+	end
+	local hidden: { [string]: boolean } = {}
+	local spots = lair:FindFirstChild("HidingSpots")
+	for _, spot in ipairs(spots and spots:GetChildren() or {}) do
+		local room = spot:GetAttribute("Room")
+		if type(room) == "string" then
+			hidden[room] = true
+		end
+	end
+	-- Every simple route Mouth > Nest.
+	local routes = 0
+	local unfair: string? = nil
+	local function walk(at: string, seen: { [string]: boolean }, safe: boolean)
+		if at == "Nest" then
+			routes += 1
+			if not safe then
+				unfair = "a route has no hiding spot"
+			end
+			return
+		end
+		for _, nextRoom in ipairs(links[at] or {}) do
+			if not seen[nextRoom] then
+				seen[nextRoom] = true
+				walk(nextRoom, seen, safe or hidden[nextRoom] == true)
+				seen[nextRoom] = nil
+			end
+		end
+	end
+	walk("Mouth", { Mouth = true }, false)
+	if routes < 2 then
+		return false, ("only %d route(s) to the nest"):format(routes)
+	end
+	if unfair then
+		return false, unfair
+	end
+	return true, ("%d routes, each with a hiding spot"):format(routes)
 end
 
 return LairBuilder

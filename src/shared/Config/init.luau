@@ -45,6 +45,12 @@ Config.Lair = {
 		{ { 0, -1 }, { -1, -1 } }, -- Path - Side
 		{ { -1, -1 }, { -1, -2 } }, -- Side - Nest (route B)
 	},
+	-- Stage 9: room shuffle. Mouth and Nest stay; each run fills the two slot rooms with two
+	-- different kits. Every kit has a hiding hollow; LairBuilder checks fairness (two routes
+	-- from the mouth to the nest, a hiding spot on each) and rebuilds if a layout fails.
+	SlotRooms = { "Path", "Side" },
+	Kits = { "Roots", "Bones", "Pillars", "Hollows" },
+	CornerInset = 15, -- studs from a slot room's centre to its corner spots (walls at 22)
 }
 
 -- Stage 1: the crew flashlight. Amber is "us"; it is the only shadow-casting light per player.

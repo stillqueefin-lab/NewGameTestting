@@ -70,7 +70,17 @@ function LairService.StartRun(players: { Player }): boolean
 		return false
 	end
 	local origin = Vector3.new(Cr.LairFirstX + (slot - 1) * Cr.LairSpacing, 0, 0)
+	-- Stage 9: a shuffled layout; rebuild if it ever fails the fairness check.
 	local lair, spawn = LairBuilder.Build(origin, math.random(1, 1e6))
+	for _ = 1, 5 do
+		local fair, why = LairBuilder.Fair(lair)
+		if fair then
+			break
+		end
+		warn("[SFTB] Unfair layout (" .. why .. "): " .. tostring(lair:GetAttribute("Layout")))
+		lair:Destroy()
+		lair, spawn = LairBuilder.Build(origin, math.random(1, 1e6))
+	end
 	local standIns = lair:FindFirstChild("ScaleStandIns")
 	if standIns then
 		standIns:Destroy()

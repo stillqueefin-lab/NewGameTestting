@@ -201,7 +201,7 @@ function HushView.Start()
 	HushCaught.OnClientEvent:Connect(onCaught)
 
 	task.spawn(function()
-		local template = ReplicatedStorage:WaitForChild("SFTBHushLook") :: Model
+		local template = ReplicatedStorage:WaitForChild("SFTBHushLook", math.huge) :: Model -- made when the first run starts
 		local function watch(child: Instance)
 			if child.Name == "SFTB_Hush" and child:IsA("Model") then
 				task.spawn(draw, child, template)
