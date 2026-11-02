@@ -29,11 +29,15 @@ local NoiseService = require(ServerRoot:WaitForChild("Noise"):WaitForChild("Nois
 local HushService = require(ServerRoot:WaitForChild("Hush"):WaitForChild("HushService"))
 local EggService = require(ServerRoot:WaitForChild("Eggs"):WaitForChild("EggService"))
 local HatchService = require(ServerRoot:WaitForChild("Hatch"):WaitForChild("HatchService"))
+local LairService = require(ServerRoot:WaitForChild("Lair"):WaitForChild("LairService"))
+local CampService = require(ServerRoot:WaitForChild("Camp"):WaitForChild("CampService"))
 
+LairService.Start(HushService, EggService, HatchService) -- clears the Edit preview lair first
 NoiseService.Start()
 HushService.Start(NoiseService.Noise)
 HatchService.Start()
-EggService.Start(NoiseService, HushService, HatchService)
+EggService.Start(NoiseService, HatchService)
+CampService.Start(LairService)
 
 local function onPlayerAdded(player)
 	if DataService.Load(player) then

@@ -246,11 +246,55 @@ Config.Hatch = {
 	EyeColor = Color3.fromHex("151816"),
 }
 
--- Camp (greybox from the block-out at x = 400). Crews arrive here after a run.
+-- Stage 7: camp (greybox from the block-out at x = 400). New players and crews after a run
+-- land here; crew pads by the gate start a run in that crew's own lair copy.
 Config.Camp = {
 	Centre = Vector3.new(400, 0, 0),
 	Arrive = Vector3.new(400, 3, -11), -- by the fire, facing it
 	ArriveSpread = 4,
+	Radius = 90, -- inside this you're "at camp" (warm lighting, out of any run)
+	Spawn = Vector3.new(400, 0.5, -28), -- where SpawnLocation goes (new players, respawns)
+	Pads = { Vector3.new(384, 0, -44), Vector3.new(400, 0, -44), Vector3.new(416, 0, -44) },
+	PadSize = 9,
+	PadLift = 0.6, -- pads sit this high so you can see them
+	Outfitter = Vector3.new(430, 0, -22), -- empty stall for now
+	PenSign = Vector3.new(411, 0, 14),
+	WoodColor = Color3.fromHex("744931"), -- palette B camp wood
+	WarmColor = Color3.fromHex("FFCF8A"), -- light language: camp, home, safe
+}
+
+-- Stage 7: crews and lair copies. Each run builds its own lair far from camp; it is
+-- cleaned up once nobody from the crew is left in it.
+Config.Crews = {
+	MaxCrew = 4,
+	CountdownSeconds = 5,
+	MaxLairs = 4, -- 12 players / crews of 1-4 = 3-4 lairs at once
+	LairFirstX = 3000, -- lair copies sit along +X, far from camp and each other
+	LairSpacing = 1500,
+	CheckSeconds = 0.5, -- how often runs are checked (left, escaped, empty)
+	PadText = "Crew pad\nStand here to start a run (1-4)",
+	StartingText = "Crew %d/%d\nStarting in %d",
+	BusyText = "All lairs busy. Wait a moment.",
+}
+
+-- Stage 7: lighting per zone (client). Darkness in lairs comes from fog, never black
+-- surfaces; camp is warm and safe (style sheet pillars 1 and 2).
+Config.Lighting = {
+	Lair = {
+		Ambient = Color3.fromRGB(100, 108, 102),
+		OutdoorAmbient = Color3.fromRGB(96, 106, 104),
+		Density = 0.36,
+		FogColor = Color3.fromRGB(46, 54, 50),
+		Decay = Color3.fromRGB(30, 36, 33),
+	},
+	Camp = {
+		Ambient = Color3.fromRGB(122, 106, 90),
+		OutdoorAmbient = Color3.fromRGB(120, 104, 90),
+		Density = 0.28,
+		FogColor = Color3.fromRGB(58, 46, 38),
+		Decay = Color3.fromRGB(40, 32, 26),
+	},
+	BlendSeconds = 1,
 }
 
 -- Stage 11: shop. Prices are read live from Roblox; only ids live here.

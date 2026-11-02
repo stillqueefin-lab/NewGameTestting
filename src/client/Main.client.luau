@@ -14,6 +14,7 @@ require(Effects:WaitForChild("EggPulse")).Start()
 require(Effects:WaitForChild("NoiseRings")).Start()
 require(Effects:WaitForChild("HushView")).Start()
 require(Effects:WaitForChild("HatchView")).Start()
+require(Effects:WaitForChild("ZoneLighting")).Start()
 require(script.Parent:WaitForChild("Controls"):WaitForChild("Controls")).Start()
 
 print("[SFTB] Client ready")

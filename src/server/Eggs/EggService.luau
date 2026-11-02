@@ -4,6 +4,7 @@
 -- front of the carrier, who gets slower (SFTB_CarrySpeed, read by Controls) and louder
 -- (SFTB_Carrying, read by NoiseService). The big egg needs two: the front carrier holds and
 -- steers, the back carrier must stay close or loses grip. Out past the cave mouth = escaped.
+-- Stage 7: each lair copy registers its eggs (AddLair) and removes them when it is cleaned up.
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,7 +23,6 @@ local EggDropPass = remotes:WaitForChild("EggDropPass") :: RemoteEvent
 
 local E = Config.Egg
 local C = Config.Carry
-local K = Config.Lair
 
 type Egg = {
 	Part: BasePart,
@@ -32,6 +32,9 @@ type Egg = {
 	Front: Player?,
 	Back: Player?,
 	Weld: WeldConstraint?,
+	Lair: Model,
+	Hush: any, -- that lair's Hush (HushService.new)
+	EscapeZ: number,
 }
 
 local EggService = {}
@@ -44,9 +47,7 @@ end
 local eggs: { Egg } = {}
 local holding: { [Player]: Egg } = {}
 local hasRun: { [Player]: boolean } = {} -- this session; Stage 8 saves it
-local escapeZ = math.huge
 local noise: any -- NoiseService
-local hush: any -- HushService
 local hatch: any -- HatchService
 
 local function hrpOf(player: Player): BasePart?
@@ -155,8 +156,8 @@ local function grab(egg: Egg, player: Player)
 		hasRun[player] = true
 		task.delay(E.FirstRunChaseDelay, function()
 			local hrp = hrpOf(player)
-			if hrp and holding[player] then
-				hush.ScriptedChase(hrp.Position)
+			if hrp and holding[player] and egg.Hush then
+				egg.Hush.ScriptedChase(hrp.Position)
 			end
 		end)
 	end
@@ -218,7 +219,7 @@ local function update()
 				)
 			then
 				EggService.Drop(egg, back) -- the back carrier lost grip: the big egg falls
-			elseif hrp.Position.Z > escapeZ then
+			elseif hrp.Position.Z > egg.EscapeZ then
 				local crew = {}
 				for _, p in ipairs({ front, back }) do
 					if p then
@@ -238,18 +239,11 @@ local function update()
 	end
 end
 
-function EggService.Start(noiseService: any, hushService: any, hatchService: any)
-	noise, hush, hatch = noiseService, hushService, hatchService
-	for _, room in ipairs(K.Rooms) do
-		if room.Name == "Mouth" then
-			escapeZ = K.Origin.Z + room.Cell[2] * K.CellSize + K.CellSize / 2 + E.EscapeMargin
-		end
-	end
-	local folder = Instance.new("Folder")
-	folder.Name = "SFTB_Eggs"
-	folder.Parent = workspace
-	for _, part in ipairs(CollectionService:GetTagged("SFTB_Egg")) do
-		if part:IsA("BasePart") and part:IsDescendantOf(workspace) then
+-- Stage 7: a lair copy's eggs become grabbable; its Hush gets the first-run chase.
+function EggService.AddLair(lair: Model, hush: any)
+	local escapeZ = lair:GetAttribute("EscapeZ") :: number? or math.huge
+	for _, part in ipairs(lair:GetDescendants()) do
+		if part:IsA("BasePart") and CollectionService:HasTag(part, "SFTB_Egg") then
 			local prompt = Instance.new("ProximityPrompt")
 			prompt.ObjectText = "Egg"
 			prompt.MaxActivationDistance = E.GrabPromptDistance
@@ -261,8 +255,10 @@ function EggService.Start(noiseService: any, hushService: any, hatchService: any
 				Size = if part:GetAttribute("EggSize") == "Big" then "Big" else "Small",
 				Home = part.CFrame,
 				Prompt = prompt,
+				Lair = lair,
+				Hush = hush,
+				EscapeZ = escapeZ,
 			}
-			part.Parent = folder
 			table.insert(eggs, egg)
 			refresh(egg)
 			prompt.Triggered:Connect(function(player)
@@ -270,6 +266,23 @@ function EggService.Start(noiseService: any, hushService: any, hatchService: any
 			end)
 		end
 	end
+end
+
+-- Stage 7: the lair is being cleaned up. Anyone still holding one of its eggs lets go.
+function EggService.RemoveLair(lair: Model)
+	for i = #eggs, 1, -1 do
+		local egg = eggs[i]
+		if egg.Lair == lair then
+			release(egg)
+			table.remove(eggs, i)
+		end
+	end
+end
+
+function EggService.Start(noiseService: any, hatchService: any)
+	noise, hatch = noiseService, hatchService
+	local hushService =
+		require(script.Parent.Parent:WaitForChild("Hush"):WaitForChild("HushService")) :: any
 	EggDropPass.OnServerEvent:Connect(dropPass)
 	hushService.Caught:Connect(onCaught)
 	Players.PlayerRemoving:Connect(function(player)
