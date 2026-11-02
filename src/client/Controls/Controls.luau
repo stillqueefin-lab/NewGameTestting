@@ -150,35 +150,43 @@ bind(dropPass, K.DropPass.Gamepad)
 bind(dropPass, nil, dropButton)
 
 local toastToken = 0
-local function showToast(text: string)
+local function showToast(text: string, seconds: number?)
 	toastToken += 1
 	local mine = toastToken
 	toast.Text = text
 	toast.Visible = true
-	task.delay(K.StubToastSeconds, function()
+	task.delay(seconds or K.StubToastSeconds, function()
 		if toastToken == mine then
 			toast.Visible = false
 		end
 	end)
 end
 
--- Stubs until their stages: Power (Stage 6, Listen), Ping (Stage 10), Drop/Pass (Stage 4).
+-- Stubs until their stages: Power (Stage 6, Listen), Ping (Stage 10).
 power.Pressed:Connect(function()
 	showToast("Power: your hatchling's power goes here")
 end)
 ping.Pressed:Connect(function()
 	showToast("Ping: coming soon")
 end)
+local remotes = ReplicatedStorage:WaitForChild("SFTBRemotes")
+local EggDropPass = remotes:WaitForChild("EggDropPass") :: RemoteEvent
 dropPass.Pressed:Connect(function()
 	if player:GetAttribute("SFTB_Carrying") then
-		showToast("Drop: coming soon")
+		EggDropPass:FireServer() -- the server decides: pass to a crewmate in reach, else drop
+	end
+end)
+local Toast = remotes:WaitForChild("Toast") :: RemoteEvent
+Toast.OnClientEvent:Connect(function(text: unknown, seconds: unknown)
+	if type(text) == "string" then
+		showToast(text, if type(seconds) == "number" then seconds else nil)
 	end
 end)
 
 -- UI swaps live by PreferredInput.
 local function refresh()
 	local input = preferred()
-	local carrying = player:GetAttribute("SFTB_Carrying") == true
+	local carrying = player:GetAttribute("SFTB_Carrying") ~= nil
 	local touch = input == "Touch"
 	powerButton.Visible = touch
 	pingButton.Visible = touch
@@ -191,15 +199,18 @@ end
 
 ---------------------------------------------------------------------------------------------
 -- Speed: keyboard picks a tier, analog gets RunSpeed and the tilt does the rest.
+-- Carrying scales it by the server's SFTB_CarrySpeed (0 = the big egg alone won't move).
 local function targetSpeed(): number
+	local carry = player:GetAttribute("SFTB_CarrySpeed")
+	local scale = if type(carry) == "number" then carry else 1
 	if preferred() ~= "KeyboardAndMouse" then
-		return N.RunSpeed
+		return N.RunSpeed * scale
 	elseif sneak:GetState() then
-		return N.SneakSpeed
+		return N.SneakSpeed * scale
 	elseif run:GetState() then
-		return N.RunSpeed
+		return N.RunSpeed * scale
 	end
-	return N.WalkSpeed
+	return N.WalkSpeed * scale
 end
 
 local function onCharacter(character: Model)
